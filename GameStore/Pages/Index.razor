@@ -1,6 +1,7 @@
 ﻿@page "/"   
 @using GameStore.Models;
-@inject NavigationManager NavigationManager;
+@inject NavigationManager NavigationManager; //Injeção de dependências para a página
+@inject GameClient client;  // Injeção de instância do cliente 
 
 <PageTitle>Game Catalog</PageTitle>
 
@@ -18,7 +19,7 @@
 }
 else
 {
-    <DeleteGame Game="@currentGame" OnClose="@OnDeleteModalClose"></DeleteGame>
+    <DeleteGame Game="@currentGame" OnClose="@OnDeleteModalCloseAsync"></DeleteGame>
 
     <table class="table table-striped table-bordered table-hober">
         <thead class="table-dark">
@@ -58,9 +59,9 @@ else
     private Game[]? games;
     private Game? currentGame; 
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        games = GameClient.GetGames();   
+        games = await client.GetGamesAsync();
     }
 
     private void CreateGame()
@@ -73,12 +74,12 @@ else
         NavigationManager.NavigateTo($"/game/{id}");
     }
 
-    private void OnDeleteModalClose(bool accepted)
+    private async Task OnDeleteModalCloseAsync(bool accepted)
     {
         if (accepted)
         {
-            GameClient.DeleteGame(currentGame!.Id);
-            games = GameClient.GetGames();
+            await client.DeleteGameAsync(currentGame!.Id);
+            games = await client.GetGamesAsync();
         }
     }
 }
